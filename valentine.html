@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>💘 Valentine?</title>
+  <style>
+    :root {
+      --bg1: #ffdde1;
+      --bg2: #ee9ca7;
+      --card: rgba(255, 255, 255, 0.75);
+      --text: #3a1b2b;
+      --yes: #ff3b7a;
+      --no: #3a1b2b;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      overflow: hidden;
+      background: radial-gradient(circle at top left, var(--bg1), var(--bg2));
+    }
+
+    /* floating hearts layer */
+    #hearts {
+      position: fixed;
+      inset: 0;
+      pointer-events: none; /* clicks go through */
+      overflow: hidden;
+    }
+
+    .heart {
+      position: absolute;
+      font-size: 20px;
+      opacity: 0.9;
+      transform: translateY(0);
+      animation: floatUp linear forwards;
+      filter: drop-shadow(0 6px 10px rgba(0,0,0,0.15));
+      pointer-events: auto; /* allow hover pop */
+    }
+    .heart:hover {
+      transform: scale(1.35);
+      transition: transform 120ms ease;
+    }
+
+    @keyframes floatUp {
+      from { transform: translateY(40px); opacity: 0; }
+      10% { opacity: 1; }
+      to { transform: translateY(-120vh); opacity: 0; }
+    }
+
+    /* main card */
+    .wrap {
+      position: relative;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .card {
+      width: min(560px, 100%);
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.6);
+      border-radius: 24px;
+      padding: 28px 22px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 18px 60px rgba(0,0,0,0.18);
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(28px, 4vw, 40px);
+      letter-spacing: 0.2px;
+    }
+
+    p {
+      margin: 0 0 18px;
+      font-size: 16px;
+      opacity: 0.85;
+    }
+
+    .btnRow {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: transform 140ms ease, box-shadow 140ms ease, background 140ms ease;
+      user-select: none;
+    }
+
+    #yesBtn {
+      background: var(--yes);
+      color: white;
+      box-shadow: 0 12px 26px rgba(255, 59, 122, 0.35);
+      transform: scale(1);
+      position: relative;
+      z-index: 3;
+    }
+    #yesBtn:hover { transform: scale(1.06); }
+
+    #noBtn {
+      background: rgba(58, 27, 43, 0.12);
+      color: var(--no);
+      border: 1px solid rgba(58, 27, 43, 0.15);
+      position: relative;
+      z-index: 2;
+    }
+    #noBtn:hover { transform: translateY(-1px); }
+
+    /* when yes becomes huge */
+    .fullScreenYes {
+      position: fixed !important;
+      inset: 0 !important;
+      border-radius: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      display: grid !important;
+      place-items: center !important;
+      font-size: clamp(24px, 6vw, 56px) !important;
+      box-shadow: none !important;
+      transform: none !important;
+      z-index: 9999 !important;
+    }
+
+    /* success screen */
+    .yay {
+      display: none;
+      margin-top: 10px;
+      font-size: clamp(22px, 4vw, 34px);
+      font-weight: 800;
+    }
+    .subyay {
+      display: none;
+      margin-top: 10px;
+      font-size: 16px;
+      opacity: 0.9;
+    }
+
+    /* little shake for "No" */
+    .shake {
+      animation: shake 240ms ease;
+    }
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      50% { transform: translateX(6px); }
+      75% { transform: translateX(-4px); }
+      100% { transform: translateX(0); }
+    }
+
+    /* footer note */
+    .hint {
+      margin-top: 16px;
+      font-size: 13px;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+  <div id="hearts"></div>
+
+  <div class="wrap">
+    <div class="card" id="card">
+      <h1 id="question">Will you be my Valentine? 💘</h1>
+      <p id="msg">I have something important to ask you…</p>
+
+      <div class="btnRow" id="buttons">
+        <button id="yesBtn">Yes 💖</button>
+        <button id="noBtn">No 🙈</button>
+      </div>
+
+      <div class="yay" id="yay">YAYYYYY! 😍💞</div>
+      <div class="subyay" id="subyay">You just made my whole day 💘</div>
+
+      <div class="hint">Tip: click hearts ✨</div>
+    </div>
+  </div>
+
+  <script>
+    const heartsLayer = document.getElementById("hearts");
+    const yesBtn = document.getElementById("yesBtn");
+    const noBtn = document.getElementById("noBtn");
+    const card = document.getElementById("card");
+    const question = document.getElementById("question");
+    const msg = document.getElementById("msg");
+    const buttons = document.getElementById("buttons");
+    const yay = document.getElementById("yay");
+    const subyay = document.getElementById("subyay");
+
+    let noClicks = 0;
+    let yesScale = 1;
+
+    const emojis = ["💖","💘","❤️","💕","💗","😍","😘","💝","🌹","✨"];
+
+    function spawnHeart(x = null, y = null, burst = false) {
+      const el = document.createElement("div");
+      el.className = "heart";
+      el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+
+      const startX = x ?? Math.random() * window.innerWidth;
+      const startY = y ?? (window.innerHeight + 20);
+
+      el.style.left = startX + "px";
+      el.style.top = startY + "px";
+
+      const size = burst ? (18 + Math.random() * 28) : (14 + Math.random() * 22);
+      el.style.fontSize = size + "px";
+
+      const duration = burst ? (1.2 + Math.random() * 1.6) : (3 + Math.random() * 4.5);
+      el.style.animationDuration = duration + "s";
+
+      // let hearts be clickable for fun pop
+      el.addEventListener("click", (e) => {
+        e.stopPropagation();
+        pop(el);
+      });
+
+      heartsLayer.appendChild(el);
+
+      el.addEventListener("animationend", () => el.remove());
+    }
+
+    function pop(el) {
+      el.style.transition = "transform 140ms ease, opacity 140ms ease";
+      el.style.transform = "scale(1.8)";
+      el.style.opacity = "0";
+      setTimeout(() => el.remove(), 140);
+    }
+
+    function burstHearts(count = 24) {
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+      for (let i = 0; i < count; i++) {
+        const dx = (Math.random() - 0.5) * 260;
+        const dy = (Math.random() - 0.5) * 140;
+        spawnHeart(cx + dx, cy + dy, true);
+      }
+    }
+
+    // background hearts continuously
+    setInterval(() => spawnHeart(), 380);
+
+    // extra hearts on click anywhere
+    document.addEventListener("click", (e) => {
+      // don’t spawn if clicking the huge yes (still okay, but looks cleaner)
+      spawnHeart(e.clientX, e.clientY, true);
+    });
+
+    noBtn.addEventListener("click", () => {
+      noClicks++;
+
+      // cute message changes
+      const lines = [
+        "Are you sure? 🥺",
+        "Pretty please? 😭💗",
+        "Don’t do me like that 😔",
+        "I’m gonna cry 😢",
+        "Ok… last chance 🙈💘",
+      ];
+      msg.textContent = lines[Math.min(noClicks - 1, lines.length - 1)];
+
+      // grow yes button each time
+      yesScale *= 1.25;
+      yesBtn.style.transform = `scale(${yesScale})`;
+
+      // little shake the card
+      card.classList.remove("shake");
+      void card.offsetWidth; // reflow to restart animation
+      card.classList.add("shake");
+
+      // once it gets huge, make it fill the screen
+      if (yesScale >= 6) {
+        yesBtn.classList.add("fullScreenYes");
+        yesBtn.textContent = "YES 💖 (click me)";
+        noBtn.style.display = "none";
+        msg.textContent = "Okay… I think the universe decided 😌💞";
+      }
+
+      burstHearts(10);
+    });
+
+    yesBtn.addEventListener("click", () => {
+      question.textContent = "She said YES!! 💍💖";
+      msg.textContent = "";
+      buttons.style.display = "none";
+      yay.style.display = "block";
+      subyay.style.display = "block";
+
+      // celebration
+      burstHearts(60);
+
+      // extra burst waves
+      let waves = 0;
+      const t = setInterval(() => {
+        burstHearts(30);
+        waves++;
+        if (waves === 4) clearInterval(t);
+      }, 450);
+    });
+
+    // on load: small heart burst
+    burstHearts(18);
+  </script>
+</body>
+</html>
